@@ -1,4 +1,5 @@
 apply plugin: "java-library"
+apply plugin: "maven"
 
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
@@ -8,5 +9,53 @@ tasks.withType(JavaCompile) {
     options.encoding = "UTF-8"
 }
 
+javadoc {
+    options.encoding = "UTF-8"
+}
+
 sourceCompatibility = "1.7"
 targetCompatibility = "1.7"
+
+task javadocJar(type: Jar) {
+    classifier 'javadoc'
+    from javadoc
+}
+
+task sourcesJar(type: Jar) {
+    classifier 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: project.property('deploy.release.url')) {
+                authentication(userName: project.property('deploy.release.user.name'), password: project.property('deploy.release.user.password'))
+            }
+            snapshotRepository(url: project.property('deploy.snapshots.url')) {
+                authentication(userName: project.property('deploy.snapshots.user.name'), password: project.property('deploy.snapshots.user.password'))
+            }
+
+            pom.project {
+                name 'bind-name-api'
+                packaging 'jar'
+                description 'bind name to view annotation processor support api'
+                version '0.0.00'
+                groupId 'com.java.lib'
+
+                developers {
+                    developer {
+                        id 'seelikes'
+                        name 'liutiantian'
+                        email 'seelikes@163.com'
+                    }
+                }
+            }
+        }
+    }
+}
