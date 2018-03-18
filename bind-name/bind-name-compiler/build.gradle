@@ -1,0 +1,13 @@
+apply plugin: "java-library"
+
+dependencies {
+    implementation fileTree(include: ["*.jar"], dir: "libs")
+    implementation "com.google.auto.service:auto-service:$rootProject.ext.auto_service"
+    implementation "com.java.lib:oil:$rootProject.ext.oil"
+    implementation "com.squareup:javapoet:$rootProject.ext.javapoet"
+    implementation project(":bind-name:bind-name-api")
+    implementation project(":processor")
+}
+
+sourceCompatibility = JavaVersion.VERSION_1_7
+targetCompatibility = JavaVersion.VERSION_1_7

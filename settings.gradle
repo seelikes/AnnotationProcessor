@@ -1,0 +1,4 @@
+include ':app'
+include ':bind-name:bind-name-api'
+include ':bind-name:bind-name-compiler'
+include ':processor'
