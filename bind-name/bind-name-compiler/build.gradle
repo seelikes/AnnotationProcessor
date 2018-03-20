@@ -6,8 +6,6 @@ dependencies {
     implementation "com.google.auto.service:auto-service:$rootProject.ext.auto_service"
     implementation "com.java.lib:oil:$rootProject.ext.oil"
     implementation "com.squareup:javapoet:$rootProject.ext.javapoet"
-    implementation project(":bind-name:bind-name-api")
-    implementation project(":processor")
 }
 
 javadoc {
@@ -16,6 +14,30 @@ javadoc {
 
 sourceCompatibility = JavaVersion.VERSION_1_7
 targetCompatibility = JavaVersion.VERSION_1_7
+
+task configured {
+    println project.name + ' configured enter.'
+    if (gradle.startParameter.taskRequests && gradle.startParameter.taskRequests[0].args[0].endsWith('uploadArchives') && gradle.startParameter.taskRequests[0].args[0].startsWith(':bind-name:bind-name-compiler')) {
+        println project.name + 'configured uploadArchives enter.'
+        dependencies.add('compile', 'com.java.lib:bind-name-api:0.0.01')
+        dependencies.add('compile', 'com.java.lib:processor:0.0.00')
+    }
+    else {
+        if (findProject(':bind-name:bind-name-api')) {
+            dependencies.add('compile', project(':bind-name:bind-name-api'))
+        }
+        else {
+            dependencies.add('compile', 'com.java.lib:bind-name-api:0.0.01')
+        }
+
+        if (findProject(':processor')) {
+            dependencies.add('compile', project(':processor'))
+        }
+        else {
+            dependencies.add('compile', 'com.java.lib:processor:0.0.00')
+        }
+    }
+}
 
 task javadocJar(type: Jar) {
     classifier 'javadoc'
@@ -46,7 +68,7 @@ uploadArchives {
                 name 'bind-name-compiler'
                 packaging 'jar'
                 description 'bind name to view annotation processor'
-                version '0.0.00'
+                version '0.0.01'
                 groupId 'com.java.lib'
 
                 developers {

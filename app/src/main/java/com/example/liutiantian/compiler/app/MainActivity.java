@@ -1,12 +1,13 @@
 package com.example.liutiantian.compiler.app;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.TextView;
 
 import com.android.lib.bind.api.annotation.BindModule;
 import com.android.lib.bind.api.annotation.BindName;
+import com.android.lib.bind.api.annotation.OnClick;
 
 public class MainActivity extends AppCompatActivity implements BindModule {
     @BindName("activity_main_hello_world")
@@ -36,5 +37,10 @@ public class MainActivity extends AppCompatActivity implements BindModule {
             return findViewById(id);
         }
         return null;
+    }
+
+    @OnClick("activity_main_hello_world")
+    public void onHelloClick(TextView helloText) {
+
     }
 }

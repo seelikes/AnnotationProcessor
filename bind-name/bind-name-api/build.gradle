@@ -45,7 +45,7 @@ uploadArchives {
                 name 'bind-name-api'
                 packaging 'jar'
                 description 'bind name to view annotation processor support api'
-                version '0.0.00'
+                version '0.0.01'
                 groupId 'com.java.lib'
 
                 developers {
