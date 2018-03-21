@@ -43,4 +43,9 @@ public class MainActivity extends AppCompatActivity implements BindModule {
     public void onHelloClick(TextView helloText) {
 
     }
+
+    @OnClick("activity_main_hello_android")
+    public void onAndroid(TextView helloAndroid) {
+
+    }
 }

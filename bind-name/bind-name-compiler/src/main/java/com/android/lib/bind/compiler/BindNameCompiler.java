@@ -62,12 +62,41 @@ public class BindNameCompiler extends AbstractProcessor {
                 continue;
             }
 
+            ClassName View = ClassName.bestGuess("android.view.View");
+
+            MethodSpec.Builder initClickBuilder = MethodSpec.methodBuilder("initClick")
+                    .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
+                    .addParameter(TypeName.get(enClosing.getEnClosingElement().getElement().asType()), "host", Modifier.FINAL)
+                    .addParameter(Object.class, "view", Modifier.FINAL)
+                    .addParameter(String.class, "method", Modifier.FINAL);
+
+            initClickBuilder.addCode("if (host == null) {\n");
+            initClickBuilder.addCode("    return;\n");
+            initClickBuilder.addCode("}\n");
+            initClickBuilder.addCode("if (view instanceof $T) {\n", View);
+            initClickBuilder.addCode("    (($T) view).setOnClickListener(new $T.OnClickListener() {\n", View, View);
+            initClickBuilder.addCode("        @$T\n", Override.class);
+            initClickBuilder.addCode("        public void onClick($T v) {\n", View);
+            initClickBuilder.addCode("            try {\n");
+            initClickBuilder.addCode("                $T.getInstance().invoke(host.getClass(), method, host, view);\n", ReflectManager.class);
+            initClickBuilder.addCode("            }\n");
+            initClickBuilder.addCode("            catch ($T e) {\n", NoSuchMethodException.class);
+            initClickBuilder.addCode("\n");
+            initClickBuilder.addCode("            }\n");
+            initClickBuilder.addCode("            catch ($T e) {\n", InvocationTargetException.class);
+            initClickBuilder.addCode("\n");
+            initClickBuilder.addCode("            }\n");
+            initClickBuilder.addCode("            catch ($T e) {\n", IllegalAccessException.class);
+            initClickBuilder.addCode("\n");
+            initClickBuilder.addCode("            }\n");
+            initClickBuilder.addCode("        }\n");
+            initClickBuilder.addCode("    });\n");
+            initClickBuilder.addCode("}\n");
+
             MethodSpec.Builder injectBuilder = MethodSpec.methodBuilder("bind")
                     .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                     .addParameter(TypeName.get(enClosing.getEnClosingElement().getElement().asType()), "host", Modifier.FINAL)
                     .addParameter(BindModule.class, "module", Modifier.FINAL);
-
-            ClassName View = ClassName.bestGuess("android.view.View");
 
             for (AnnotatedElement<? extends Element> annotated : enClosing) {
                 if (annotated.getElement() instanceof VariableElement) {
@@ -77,26 +106,7 @@ public class BindNameCompiler extends AbstractProcessor {
                 }
                 else if (annotated.getElement() instanceof ExecutableElement) {
                     if (annotated.getElement().getAnnotation(OnClick.class) != null) {
-                        injectBuilder.addStatement("Object view = module.provideTarget(\"$L\")", annotated.getElement().getAnnotation(OnClick.class).value());
-                        injectBuilder.addCode("if (view instanceof $T) {\n", View);
-                        injectBuilder.addCode("    (($T) view).setOnClickListener(new $T.OnClickListener() {\n", View, View);
-                        injectBuilder.addCode("        @$T\n", Override.class);
-                        injectBuilder.addCode("        public void onClick($T v) {\n", View);
-                        injectBuilder.addCode("            try {\n");
-                        injectBuilder.addCode("                $T.getInstance().invoke(host.getClass(), \"$N\", host, module.provideTarget(\"$L\"));\n", ReflectManager.class, annotated.getElement().getSimpleName(), annotated.getElement().getAnnotation(OnClick.class).value());
-                        injectBuilder.addCode("            }\n");
-                        injectBuilder.addCode("            catch ($T e) {\n", NoSuchMethodException.class);
-                        injectBuilder.addCode("\n");
-                        injectBuilder.addCode("            }\n");
-                        injectBuilder.addCode("            catch ($T e) {\n", InvocationTargetException.class);
-                        injectBuilder.addCode("\n");
-                        injectBuilder.addCode("            }\n");
-                        injectBuilder.addCode("            catch ($T e) {\n", IllegalAccessException.class);
-                        injectBuilder.addCode("\n");
-                        injectBuilder.addCode("            }\n");
-                        injectBuilder.addCode("        }\n");
-                        injectBuilder.addCode("    });\n");
-                        injectBuilder.addCode("}\n");
+                        injectBuilder.addStatement("initClick(host, module.provideTarget(\"$N\"), \"$N\")", annotated.getElement().getAnnotation(OnClick.class).value(), annotated.getElement().getSimpleName());
                     }
                 }
             }
@@ -105,6 +115,7 @@ public class BindNameCompiler extends AbstractProcessor {
                     .addJavadoc("PLEASE DO NOT EDIT THIS CLASS, IT IS AUTO GENERATED, REFRESH FROM BUILD TO BUILD!\n")
                     .addModifiers(Modifier.PUBLIC)
                     .addMethod(injectBuilder.build())
+                    .addMethod(initClickBuilder.build())
                     .build();
             try {
                 JavaFile.builder(enClosing.getEnClosingElement().getPackage(), binderClass).indent("    ").build().writeTo(processingEnv.getFiler());

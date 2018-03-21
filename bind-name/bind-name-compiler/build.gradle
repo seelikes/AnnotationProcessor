@@ -68,7 +68,7 @@ uploadArchives {
                 name 'bind-name-compiler'
                 packaging 'jar'
                 description 'bind name to view annotation processor'
-                version '0.0.01'
+                version '0.0.02'
                 groupId 'com.java.lib'
 
                 developers {
