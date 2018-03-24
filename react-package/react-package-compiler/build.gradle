@@ -23,7 +23,7 @@ targetCompatibility = "1.7"
 
 task configured {
     println project.name + " configured enter."
-    if (gradle.startParameter.taskRequests && gradle.startParameter.taskRequests[0].args[0].endsWith("uploadArchives") && gradle.startParameter.taskRequests[0].args[0].startsWith(":bind-name:bind-name-compiler")) {
+    if (gradle.startParameter.taskRequests && gradle.startParameter.taskRequests[0].args[0].endsWith("uploadArchives") && gradle.startParameter.taskRequests[0].args[0].startsWith(":react-package:react-package-compiler")) {
         println project.name + "configured uploadArchives enter."
         dependencies.add("api", "com.android.lib:react-package-api:0.0.00")
         dependencies.add("api", "com.java.lib:processor:0.0.00")

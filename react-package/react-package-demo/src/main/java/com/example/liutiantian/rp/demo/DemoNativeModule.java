@@ -9,8 +9,8 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule;
  */
 
 @RPNativeModule("Demo")
-public class DemoModule extends ReactContextBaseJavaModule {
-    public DemoModule(ReactApplicationContext reactContext) {
+public class DemoNativeModule extends ReactContextBaseJavaModule {
+    public DemoNativeModule(ReactApplicationContext reactContext) {
         super(reactContext);
     }
 

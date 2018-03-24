@@ -26,6 +26,7 @@ import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
+import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 
 @AutoService(Processor.class)
@@ -98,6 +99,15 @@ public class RPCompiler extends AbstractProcessor {
                     break;
                 }
             }
+            for (Element element : nameManagers) {
+                while (true) {
+                    if (packageElement != null && !GlobalMethods.getInstance().checkEqual(packageElement, element.getEnclosingElement())) {
+                        packageElement = packageElement.getEnclosingElement();
+                        continue;
+                    }
+                    break;
+                }
+            }
 
             ClassName ReactPackage = ClassName.bestGuess("com.facebook.react.ReactPackage");
             ClassName NativeModule = ClassName.bestGuess("com.facebook.react.bridge.NativeModule");
@@ -148,7 +158,7 @@ public class RPCompiler extends AbstractProcessor {
                     else {
                         createViewManagersBuilder.addCode(", ");
                     }
-                    createViewManagersBuilder.addCode("new $T(reactContext)", nameManagers.get(i).asType());
+                    createViewManagersBuilder.addCode("new $T()", nameManagers.get(i).asType());
                     if (i == nameManagers.size() - 1) {
                         createViewManagersBuilder.addCode("\n");
                     }
@@ -165,7 +175,7 @@ public class RPCompiler extends AbstractProcessor {
                     .build();
             try {
                 if (packageElement != null) {
-                    JavaFile.builder(packageElement.getSimpleName().toString(), rpClass).indent("    ").build().writeTo(processingEnv.getFiler());
+                    JavaFile.builder(((PackageElement) packageElement).getQualifiedName().toString(), rpClass).indent("    ").build().writeTo(processingEnv.getFiler());
                 }
                 else {
                     JavaFile.builder("com.android.lib.rp", rpClass).indent("    ").build().writeTo(processingEnv.getFiler());
