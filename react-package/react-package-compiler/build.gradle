@@ -1,0 +1,96 @@
+apply plugin: "java-library"
+apply plugin: "maven"
+
+dependencies {
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+    implementation "com.google.auto.service:auto-service:$rootProject.ext.auto_service"
+    compileOnly "com.facebook.react:react-native:$rootProject.ext.react_native"
+    api "com.google.code.gson:gson:$rootProject.ext.gson"
+    api "com.java.lib:oil:$rootProject.ext.oil"
+    api "com.squareup:javapoet:$rootProject.ext.javapoet"
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = "UTF-8"
+}
+
+javadoc {
+    options.encoding = "UTF-8"
+}
+
+sourceCompatibility = "1.7"
+targetCompatibility = "1.7"
+
+repositories {
+    maven {
+        url "$projectDir/node_modules/react-native/android"
+    }
+}
+
+task configured {
+    println project.name + " configured enter."
+    if (gradle.startParameter.taskRequests && gradle.startParameter.taskRequests[0].args[0].endsWith("uploadArchives") && gradle.startParameter.taskRequests[0].args[0].startsWith(":bind-name:bind-name-compiler")) {
+        println project.name + "configured uploadArchives enter."
+        dependencies.add("api", "com.android.lib:react-package-api:0.0.00")
+        dependencies.add("api", "com.java.lib:processor:0.0.00")
+    }
+    else {
+        if (findProject(":react-package:react-package-api")) {
+            dependencies.add("api", project(":react-package:react-package-api"))
+        }
+        else {
+            dependencies.add("api", "com.android.lib:react-package-api:0.0.00")
+        }
+
+        if (findProject(":processor")) {
+            dependencies.add("api", project(":processor"))
+        }
+        else {
+            dependencies.add("api", "com.java.lib:processor:0.0.00")
+        }
+    }
+}
+
+task javadocJar(type: Jar) {
+    classifier "javadoc"
+    from javadoc
+}
+
+task sourcesJar(type: Jar) {
+    classifier "sources"
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: project.property("deploy.release.url")) {
+                authentication(userName: project.property("deploy.release.user.name"), password: project.property("deploy.release.user.password"))
+            }
+            snapshotRepository(url: project.property("deploy.snapshots.url")) {
+                authentication(userName: project.property("deploy.snapshots.user.name"), password: project.property("deploy.snapshots.user.password"))
+            }
+
+            pom.project {
+                name "react-pacakge-compiler"
+                packaging "jar"
+                description "react pacakge processor"
+                version "0.0.00"
+                groupId "com.android.lib"
+
+                developers {
+                    developer {
+                        id "seelikes"
+                        name "liutiantian"
+                        email "seelikes@163.com"
+                    }
+                }
+            }
+        }
+    }
+}

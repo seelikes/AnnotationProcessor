@@ -1,0 +1,37 @@
+apply plugin: "com.android.library"
+
+android {
+    compileSdkVersion rootProject.ext.compileSdk
+
+    defaultConfig {
+        minSdkVersion rootProject.ext.minSdk
+        targetSdkVersion rootProject.ext.targetSdk
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation "com.android.support:appcompat-v7:$rootProject.ext.appcompat_v7"
+    androidTestImplementation "com.android.support.test:runner:$rootProject.ext.runner"
+    androidTestImplementation "com.android.support.test.espresso:espresso-core:$rootProject.ext.espresso_core"
+    compileOnly "com.facebook.react:react-native:$rootProject.ext.react_native"
+    testImplementation "junit:junit:$rootProject.ext.junit"
+    compileOnly project(':react-package:react-package-api')
+    annotationProcessor project(':react-package:react-package-compiler')
+}
+
+repositories {
+    maven {
+        url "$projectDir/node_modules/react-native/android"
+    }
+}

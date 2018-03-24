@@ -41,8 +41,10 @@ ext {
     auto_service = "1.0-rc4"
     constraint_layout = "1.0.2"
     espresso_core = "3.0.1"
+    gson = "2.8.2"
     javapoet = "1.10.0"
     junit = "4.12"
     oil = "1.1.15"
     runner = "1.0.1"
+    react_native = "0.54.2"
 }
