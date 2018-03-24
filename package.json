@@ -1,0 +1,26 @@
+{
+  "name": "annotation-processor",
+  "version": "0.0.0",
+  "description": "annotation processor collection",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "npm jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/seelikes/AnnotationProcessor.git"
+  },
+  "keywords": [
+    "annotation",
+    "processor"
+  ],
+  "author": "seelikes",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/seelikes/AnnotationProcessor/issues"
+  },
+  "homepage": "https://github.com/seelikes/AnnotationProcessor#readme",
+  "dependencies": {
+    "react-native": "^0.54.2"
+  }
+}

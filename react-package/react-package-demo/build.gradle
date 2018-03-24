@@ -29,9 +29,3 @@ dependencies {
     compileOnly project(':react-package:react-package-api')
     annotationProcessor project(':react-package:react-package-compiler')
 }
-
-repositories {
-    maven {
-        url "$projectDir/node_modules/react-native/android"
-    }
-}

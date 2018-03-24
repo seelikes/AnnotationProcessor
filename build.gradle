@@ -22,6 +22,9 @@ allprojects {
         maven {
             url "http://112.74.29.196:34272/repository/maven-public/"
         }
+        maven {
+            url "$rootDir/node_modules/react-native/android"
+        }
     }
 }
 
