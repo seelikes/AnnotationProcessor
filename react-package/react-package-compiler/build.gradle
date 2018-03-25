@@ -1,5 +1,5 @@
 apply plugin: "java-library"
-apply plugin: "maven"
+apply plugin: "maven-publish"
 
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
@@ -55,35 +55,31 @@ task sourcesJar(type: Jar) {
     from sourceSets.main.allSource
 }
 
-artifacts {
-    archives javadocJar
-    archives sourcesJar
-}
-
-uploadArchives {
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId "com.android.lib"
+            artifactId "react-package-compiler"
+            version "0.0.00"
+            description "react pacakge processor"
+            from components.java
+            artifact javadocJar
+            artifact sourcesJar
+            pom.withXml {
+                def dependencies = asNode().appendNode("dependencies")
+                wrapIntoDependencies(dependencies, configurations.api, "compile")
+                wrapIntoDependencies(dependencies, configurations.implementation, "provided")
+                wrapIntoDependencies(dependencies, configurations.compileOnly, "runtime")
+                wrapIntoDependencies(dependencies, configurations.testImplementation, "test")
+            }
+        }
+    }
     repositories {
-        mavenDeployer {
-            repository(url: project.property("deploy.release.url")) {
-                authentication(userName: project.property("deploy.release.user.name"), password: project.property("deploy.release.user.password"))
-            }
-            snapshotRepository(url: project.property("deploy.snapshots.url")) {
-                authentication(userName: project.property("deploy.snapshots.user.name"), password: project.property("deploy.snapshots.user.password"))
-            }
-
-            pom.project {
-                name "react-pacakge-compiler"
-                packaging "jar"
-                description "react pacakge processor"
-                version "0.0.00"
-                groupId "com.android.lib"
-
-                developers {
-                    developer {
-                        id "seelikes"
-                        name "liutiantian"
-                        email "seelikes@163.com"
-                    }
-                }
+        maven {
+            url project.property("deploy.release.url")
+            credentials {
+                username project.property("deploy.release.user.name")
+                password project.property("deploy.release.user.password")
             }
         }
     }

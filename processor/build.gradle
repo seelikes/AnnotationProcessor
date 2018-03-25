@@ -1,5 +1,5 @@
 apply plugin: "java-library"
-apply plugin: "maven"
+apply plugin: "maven-publish"
 
 dependencies {
     implementation fileTree(include: ["*.jar"], dir: "libs")
@@ -18,44 +18,40 @@ sourceCompatibility = "1.7"
 targetCompatibility = "1.7"
 
 task javadocJar(type: Jar) {
-    classifier 'javadoc'
+    classifier "javadoc"
     from javadoc
 }
 
 task sourcesJar(type: Jar) {
-    classifier 'sources'
+    classifier "sources"
     from sourceSets.main.allSource
 }
 
-artifacts {
-    archives javadocJar
-    archives sourcesJar
-}
-
-uploadArchives {
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId "com.java.lib"
+            artifactId "processor"
+            version "0.0.00"
+            description "A java library helping you developing Annotation Processors."
+            from components.java
+            artifact javadocJar
+            artifact sourcesJar
+            pom.withXml {
+                def dependencies = asNode().appendNode("dependencies")
+                wrapIntoDependencies(dependencies, configurations.api, "compile")
+                wrapIntoDependencies(dependencies, configurations.implementation, "provided")
+                wrapIntoDependencies(dependencies, configurations.compileOnly, "runtime")
+                wrapIntoDependencies(dependencies, configurations.testImplementation, "test")
+            }
+        }
+    }
     repositories {
-        mavenDeployer {
-            repository(url: project.property('deploy.release.url')) {
-                authentication(userName: project.property('deploy.release.user.name'), password: project.property('deploy.release.user.password'))
-            }
-            snapshotRepository(url: project.property('deploy.snapshots.url')) {
-                authentication(userName: project.property('deploy.snapshots.user.name'), password: project.property('deploy.snapshots.user.password'))
-            }
-
-            pom.project {
-                name 'processor'
-                packaging 'jar'
-                description 'A java library helping you developing Annotation Processors.'
-                version '0.0.00'
-                groupId 'com.java.lib'
-
-                developers {
-                    developer {
-                        id 'seelikes'
-                        name 'liutiantian'
-                        email 'seelikes@163.com'
-                    }
-                }
+        maven {
+            url project.property("deploy.release.url")
+            credentials {
+                username project.property("deploy.release.user.name")
+                password project.property("deploy.release.user.password")
             }
         }
     }

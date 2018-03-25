@@ -36,6 +36,58 @@ tasks.withType(JavaCompile) {
     options.encoding "UTF-8"
 }
 
+/**
+ * 将指定的配置信息打包进入pom的dependencies节点
+ * scope的取值有
+ * compile  --- api
+ * provided --- implementation
+ * runtime  --- compileOnly
+ * test     --- testImplementation androidTestImplementation
+ * @param dependencies pom的dependencies节点
+ * @param configuration 当前操作的配置信息
+ * @param scope 当前的配置预期写入的scope类型。
+ * @return void
+ */
+def wrapIntoDependencies(Node dependencies, Configuration configuration, String scope) {
+    if (configuration == null || scope == null || scope.isEmpty()) {
+        return
+    }
+    configuration.allDependencies.each { Dependency dep ->
+        if (dep.group == null || dep.version == null || dep.name == null || dep.name == "unspecified" || dep.version == "unspecified") {
+            return
+        }
+
+        for(int i = 0; i < dependencies.children().size(); ++i) {
+            Object next = dependencies.children().get(i)
+            if (next instanceof Node) {
+                Node node = (Node) next
+                if (node.name() == "dependency") {
+                    if (node.groupId[0].value() == dep.group && node.artifactId[0].value() == dep.name && node.version[0].value() == dep.version) {
+                        def scopes = ["compile", "provided", "runtime", "system", "test"]
+                        def cur = scopes.indexOf(scope)
+                        def attach = scopes.indexOf(node.scope[0].value())
+                        if (node.scope[0].value() == null || node.scope[0].value().isEmpty()) {
+                            attach = scopes.indexOf("compile")
+                        }
+                        def winner = cur
+                        if (attach < cur) {
+                            winner = attach
+                        }
+                        node.scope[0].value = scopes[winner]
+                        return
+                    }
+                }
+            }
+        }
+
+        def node = dependencies.appendNode("dependency")
+        node.appendNode("groupId", dep.group)
+        node.appendNode("artifactId", dep.name)
+        node.appendNode("version", dep.version)
+        node.appendNode("scope", scope)
+    }
+}
+
 ext {
     compileSdk = 26
     minSdk = 15
