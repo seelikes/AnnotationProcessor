@@ -19,7 +19,7 @@ task configured {
     println project.name + " configured enter."
     if (gradle.startParameter.taskRequests && gradle.startParameter.taskRequests[0].args[0].endsWith("publish") && gradle.startParameter.taskRequests[0].args[0].startsWith(":bind-name:bind-name-compiler")) {
         println project.name + "configured uploadArchives enter."
-        dependencies.add("api", "com.java.lib:bind-name-api:0.0.01")
+        dependencies.add("api", "com.java.lib:bind-name-api:0.0.02")
         dependencies.add("api", "com.java.lib:processor:0.0.00")
     }
     else {
@@ -27,7 +27,7 @@ task configured {
             dependencies.add("api", project(":bind-name:bind-name-api"))
         }
         else {
-            dependencies.add("api", "com.java.lib:bind-name-api:0.0.01")
+            dependencies.add("api", "com.java.lib:bind-name-api:0.0.02")
         }
 
         if (findProject(":processor")) {
@@ -52,10 +52,11 @@ task sourcesJar(type: Jar) {
 publishing {
     publications {
         maven(MavenPublication) {
-            groupId "com.java.lib"
+            groupId "com.android.lib"
             artifactId "bind-name-compiler"
-            version "0.0.02"
+            version "0.0.03"
             description "bind name to view annotation processor"
+            artifact jar
             artifact javadocJar
             artifact sourcesJar
             pom.withXml {

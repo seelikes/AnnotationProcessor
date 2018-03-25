@@ -11,6 +11,10 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.SOURCE)
-public @interface BindName {
+public @interface BindView {
+    /**
+     * 视图资源id的名字
+     * @return 资源id的名字
+     */
     String value();
 }

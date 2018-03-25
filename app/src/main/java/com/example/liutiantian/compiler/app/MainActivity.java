@@ -6,14 +6,14 @@ import android.util.Log;
 import android.widget.TextView;
 
 import com.android.lib.bind.api.annotation.BindModule;
-import com.android.lib.bind.api.annotation.BindName;
+import com.android.lib.bind.api.annotation.BindView;
 import com.android.lib.bind.api.annotation.OnClick;
 
 public class MainActivity extends AppCompatActivity implements BindModule {
-    @BindName("activity_main_hello_world")
+    @BindView("activity_main_hello_world")
     private TextView helloText;
 
-    @BindName("activity_main_hello_android")
+    @BindView("activity_main_hello_android")
     private TextView helloAndroid;
 
     @Override

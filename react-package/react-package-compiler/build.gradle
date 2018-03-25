@@ -62,6 +62,7 @@ publishing {
             artifactId "react-package-compiler"
             version "0.0.00"
             description "react pacakge processor"
+            artifact jar
             artifact javadocJar
             artifact sourcesJar
             pom.withXml {

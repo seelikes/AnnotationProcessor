@@ -33,6 +33,7 @@ publishing {
             artifactId "react-package-api"
             version "0.0.00"
             description "react package compiler support api"
+            artifact jar
             artifact javadocJar
             artifact sourcesJar
             pom.withXml {

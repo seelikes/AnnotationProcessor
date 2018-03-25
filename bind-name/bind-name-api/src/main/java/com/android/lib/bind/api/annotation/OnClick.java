@@ -12,5 +12,9 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.SOURCE)
 public @interface OnClick {
+    /**
+     * 视图资源id的名字
+     * @return 资源id的名字
+     */
     String value();
 }

@@ -34,6 +34,7 @@ publishing {
             artifactId "processor"
             version "0.0.00"
             description "A java library helping you developing Annotation Processors."
+            artifact jar
             artifact javadocJar
             artifact sourcesJar
             pom.withXml {

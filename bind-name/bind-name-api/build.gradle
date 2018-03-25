@@ -29,10 +29,11 @@ task sourcesJar(type: Jar) {
 publishing {
     publications {
         maven(MavenPublication) {
-            groupId "com.java.lib"
+            groupId "com.android.lib"
             artifactId "bind-name-api"
-            version "0.0.01"
+            version "0.0.02"
             description "bind name to view annotation processor support api"
+            artifact jar
             artifact javadocJar
             artifact sourcesJar
             pom.withXml {

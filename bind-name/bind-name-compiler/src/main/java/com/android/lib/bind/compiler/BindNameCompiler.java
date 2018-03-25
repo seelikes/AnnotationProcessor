@@ -1,7 +1,7 @@
 package com.android.lib.bind.compiler;
 
 import com.android.lib.bind.api.annotation.BindModule;
-import com.android.lib.bind.api.annotation.BindName;
+import com.android.lib.bind.api.annotation.BindView;
 import com.android.lib.bind.api.annotation.OnClick;
 import com.google.auto.service.AutoService;
 import com.java.lib.oil.lang.reflect.ReflectManager;
@@ -32,7 +32,7 @@ import javax.lang.model.element.VariableElement;
 
 @AutoService(Processor.class)
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
-@SupportedAnnotationTypes({"com.android.lib.bind.api.annotation.BindName", "com.android.lib.bind.api.annotation.OnClick"})
+@SupportedAnnotationTypes({"com.android.lib.bind.api.annotation.BindView", "com.android.lib.bind.api.annotation.OnClick"})
 public class BindNameCompiler extends AbstractProcessor {
     private EnClosingClassCache cache;
 
@@ -42,7 +42,7 @@ public class BindNameCompiler extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        Set<? extends Element> names = roundEnv.getElementsAnnotatedWith(BindName.class);
+        Set<? extends Element> names = roundEnv.getElementsAnnotatedWith(BindView.class);
         if (!names.isEmpty()) {
             for (Element name : names) {
                 cache.add(name, processingEnv);
@@ -103,8 +103,8 @@ public class BindNameCompiler extends AbstractProcessor {
 
             for (AnnotatedElement<? extends Element> annotated : enClosing) {
                 if (annotated.getElement() instanceof VariableElement) {
-                    if (annotated.getElement().getAnnotation(BindName.class) != null) {
-                        injectBuilder.addStatement("$T.getInstance().setField(host.getClass(), \"$N\", host, module.provideTarget(\"$L\"))", ReflectManager.class, annotated.getElement().getSimpleName(), annotated.getElement().getAnnotation(BindName.class).value());
+                    if (annotated.getElement().getAnnotation(BindView.class) != null) {
+                        injectBuilder.addStatement("$T.getInstance().setField(host.getClass(), \"$N\", host, module.provideTarget(\"$L\"))", ReflectManager.class, annotated.getElement().getSimpleName(), annotated.getElement().getAnnotation(BindView.class).value());
                     }
                 }
                 else if (annotated.getElement() instanceof ExecutableElement) {
