@@ -23,7 +23,7 @@ targetCompatibility = "1.7"
 
 task configured {
     println project.name + " configured enter."
-    if (gradle.startParameter.taskRequests && gradle.startParameter.taskRequests[0].args[0].endsWith("uploadArchives") && gradle.startParameter.taskRequests[0].args[0].startsWith(":react-package:react-package-compiler")) {
+    if (gradle.startParameter.taskRequests && gradle.startParameter.taskRequests[0].args[0].endsWith("publish") && gradle.startParameter.taskRequests[0].args[0].startsWith(":react-package:react-package-compiler")) {
         println project.name + "configured uploadArchives enter."
         dependencies.add("api", "com.android.lib:react-package-api:0.0.00")
         dependencies.add("api", "com.java.lib:processor:0.0.00")
@@ -62,11 +62,10 @@ publishing {
             artifactId "react-package-compiler"
             version "0.0.00"
             description "react pacakge processor"
-            from components.java
             artifact javadocJar
             artifact sourcesJar
             pom.withXml {
-                def dependencies = asNode().appendNode("dependencies")
+                def dependencies = createSubNodeIfNotExist(asNode(), "dependencies")
                 wrapIntoDependencies(dependencies, configurations.api, "compile")
                 wrapIntoDependencies(dependencies, configurations.implementation, "provided")
                 wrapIntoDependencies(dependencies, configurations.compileOnly, "runtime")

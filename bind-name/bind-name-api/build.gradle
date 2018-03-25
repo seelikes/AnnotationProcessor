@@ -33,7 +33,6 @@ publishing {
             artifactId "bind-name-api"
             version "0.0.01"
             description "bind name to view annotation processor support api"
-            from components.java
             artifact javadocJar
             artifact sourcesJar
             pom.withXml {

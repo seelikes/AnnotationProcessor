@@ -1,3 +1,5 @@
+import groovy.xml.QName
+
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
@@ -61,7 +63,7 @@ def wrapIntoDependencies(Node dependencies, Configuration configuration, String 
             Object next = dependencies.children().get(i)
             if (next instanceof Node) {
                 Node node = (Node) next
-                if (node.name() == "dependency") {
+                if (nodeName(node) == "dependency") {
                     if (node.groupId[0].value() == dep.group && node.artifactId[0].value() == dep.name && node.version[0].value() == dep.version) {
                         def scopes = ["compile", "provided", "runtime", "system", "test"]
                         def cur = scopes.indexOf(scope)
@@ -86,6 +88,46 @@ def wrapIntoDependencies(Node dependencies, Configuration configuration, String 
         node.appendNode("version", dep.version)
         node.appendNode("scope", scope)
     }
+}
+
+/**
+ * 试图在创建之前检查对应节点是否存在，不存在则创建
+ * @param parent 父节点
+ * @param name 新建节点名字
+ * @return 创建的节点
+ */
+def createSubNodeIfNotExist(Node parent, String name) {
+    if (parent == null || name == null || name.isEmpty()) {
+        return null
+    }
+    for(int i = 0; i < parent.children().size(); ++i) {
+        Object next = parent.children().get(i)
+        if (next instanceof Node) {
+            if (nodeName(next) == name) {
+                return next
+            }
+        }
+    }
+    return parent.appendNode(name)
+}
+
+/**
+ * 获取节点的名字
+ * @param node 节点
+ * @return 节点的名字
+ */
+def nodeName(Node node) {
+    if (node == null) {
+        return null
+    }
+    def name = node.name()
+    if (name instanceof String) {
+        return name
+    }
+    else if (name instanceof QName) {
+        return name.localPart
+    }
+    return name
 }
 
 ext {
