@@ -4,7 +4,7 @@ import com.android.lib.bind.api.annotation.BindModule;
 import com.android.lib.bind.api.annotation.BindView;
 import com.android.lib.bind.api.annotation.OnClick;
 import com.google.auto.service.AutoService;
-import com.java.lib.oil.lang.reflect.ReflectManager;
+import com.java.lib.oil.GlobalMethods;
 import com.java.lib.processor.AnnotatedElement;
 import com.java.lib.processor.EnClosingClass;
 import com.java.lib.processor.utils.EnClosingClassCache;
@@ -15,7 +15,7 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 import java.util.Set;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -27,6 +27,7 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
+import javax.lang.model.element.Name;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 
@@ -67,35 +68,6 @@ public class BindNameCompiler extends AbstractProcessor {
 
             ClassName View = ClassName.bestGuess("android.view.View");
 
-            MethodSpec.Builder initClickBuilder = MethodSpec.methodBuilder("initClick")
-                    .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
-                    .addParameter(TypeName.get(enClosing.getEnClosingElement().getElement().asType()), "host", Modifier.FINAL)
-                    .addParameter(Object.class, "view", Modifier.FINAL)
-                    .addParameter(String.class, "method", Modifier.FINAL);
-
-            initClickBuilder.addCode("if (host == null) {\n");
-            initClickBuilder.addCode("    return;\n");
-            initClickBuilder.addCode("}\n");
-            initClickBuilder.addCode("if (view instanceof $T) {\n", View);
-            initClickBuilder.addCode("    (($T) view).setOnClickListener(new $T.OnClickListener() {\n", View, View);
-            initClickBuilder.addCode("        @$T\n", Override.class);
-            initClickBuilder.addCode("        public void onClick($T v) {\n", View);
-            initClickBuilder.addCode("            try {\n");
-            initClickBuilder.addCode("                $T.getInstance().invoke(host.getClass(), method, host, view);\n", ReflectManager.class);
-            initClickBuilder.addCode("            }\n");
-            initClickBuilder.addCode("            catch ($T e) {\n", NoSuchMethodException.class);
-            initClickBuilder.addCode("\n");
-            initClickBuilder.addCode("            }\n");
-            initClickBuilder.addCode("            catch ($T e) {\n", InvocationTargetException.class);
-            initClickBuilder.addCode("\n");
-            initClickBuilder.addCode("            }\n");
-            initClickBuilder.addCode("            catch ($T e) {\n", IllegalAccessException.class);
-            initClickBuilder.addCode("\n");
-            initClickBuilder.addCode("            }\n");
-            initClickBuilder.addCode("        }\n");
-            initClickBuilder.addCode("    });\n");
-            initClickBuilder.addCode("}\n");
-
             MethodSpec.Builder injectBuilder = MethodSpec.methodBuilder("bind")
                     .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                     .addParameter(TypeName.get(enClosing.getEnClosingElement().getElement().asType()), "host", Modifier.FINAL)
@@ -104,12 +76,34 @@ public class BindNameCompiler extends AbstractProcessor {
             for (AnnotatedElement<? extends Element> annotated : enClosing) {
                 if (annotated.getElement() instanceof VariableElement) {
                     if (annotated.getElement().getAnnotation(BindView.class) != null) {
-                        injectBuilder.addStatement("$T.getInstance().setField(host.getClass(), \"$N\", host, module.provideTarget(\"$L\"))", ReflectManager.class, annotated.getElement().getSimpleName(), annotated.getElement().getAnnotation(BindView.class).value());
+                        injectBuilder.addStatement("host.$N = ($T) module.provideTarget(\"$L\")", annotated.getElement().getSimpleName(), annotated.getElement().asType(), annotated.getElement().getAnnotation(BindView.class).value());
                     }
                 }
                 else if (annotated.getElement() instanceof ExecutableElement) {
                     if (annotated.getElement().getAnnotation(OnClick.class) != null) {
-                        injectBuilder.addStatement("initClick(host, module.provideTarget(\"$N\"), \"$N\")", annotated.getElement().getAnnotation(OnClick.class).value(), annotated.getElement().getSimpleName());
+                        Name name = findName(names, annotated.getElement().getAnnotation(OnClick.class).value());
+                        if (name != null) {
+                            injectBuilder.addCode("host.$N.setOnClickListener(new $T.OnClickListener() {\n", name, View);
+                            injectBuilder.addCode("    @$T\n", Override.class);
+                            injectBuilder.addCode("    public void onClick($T v) {\n", View);
+                            injectBuilder.addCode("         host.$N(host.$N);\n", annotated.getElement().getSimpleName(), name);
+                            injectBuilder.addCode("    }\n");
+                            injectBuilder.addCode("});\n");
+                        }
+                        else {
+                            injectBuilder.addCode("(($T) module.provideTarget(\"$N\")).setOnClickListener(new $T.OnClickListener() {\n", View, annotated.getElement().getAnnotation(OnClick.class).value(), View);
+                            injectBuilder.addCode("    @$T\n", Override.class);
+                            injectBuilder.addCode("    public void onClick($T v) {\n", View);
+                            List<? extends VariableElement> parameters = ((ExecutableElement) annotated.getElement()).getParameters();
+                            if (parameters != null) {
+                                injectBuilder.addCode("         host.$N((($T) module.provideTarget(\"$N\")));\n", annotated.getElement().getSimpleName(), parameters.get(0).asType(), annotated.getElement().getAnnotation(OnClick.class).value());
+                            }
+                            else {
+                                injectBuilder.addCode("         host.$N();\n", annotated.getElement().getSimpleName());
+                            }
+                            injectBuilder.addCode("    }\n");
+                            injectBuilder.addCode("});\n");
+                        }
                     }
                 }
             }
@@ -118,7 +112,6 @@ public class BindNameCompiler extends AbstractProcessor {
                     .addJavadoc("PLEASE DO NOT EDIT THIS CLASS, IT IS AUTO GENERATED, REFRESH FROM BUILD TO BUILD!\n")
                     .addModifiers(Modifier.PUBLIC)
                     .addMethod(injectBuilder.build())
-                    .addMethod(initClickBuilder.build())
                     .build();
             try {
                 JavaFile.builder(enClosing.getEnClosingElement().getPackage(), binderClass).indent("    ").build().writeTo(processingEnv.getFiler());
@@ -129,5 +122,23 @@ public class BindNameCompiler extends AbstractProcessor {
         }
 
         return true;
+    }
+
+    /**
+     * 查找被注解元素的名字
+     * @param names 被注解元素的名字集合
+     * @param element 被注解元素的资源名字
+     * @return 被注解元素的名字
+     */
+    public Name findName(Set<? extends Element> names, String element) {
+        if (names == null || names.isEmpty() || element == null) {
+            return null;
+        }
+        for (Element name : names) {
+            if (GlobalMethods.getInstance().checkEqual(name.getAnnotation(BindView.class).value(), element)) {
+                return name.getSimpleName();
+            }
+        }
+        return null;
     }
 }

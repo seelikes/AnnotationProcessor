@@ -54,7 +54,7 @@ publishing {
         maven(MavenPublication) {
             groupId "com.android.lib"
             artifactId "bind-name-compiler"
-            version "0.0.03"
+            version "0.0.04"
             description "bind name to view annotation processor"
             artifact jar
             artifact javadocJar

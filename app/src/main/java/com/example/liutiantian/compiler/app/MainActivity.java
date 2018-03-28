@@ -11,10 +11,10 @@ import com.android.lib.bind.api.annotation.OnClick;
 
 public class MainActivity extends AppCompatActivity implements BindModule {
     @BindView("activity_main_hello_world")
-    private TextView helloText;
+    protected TextView helloText;
 
     @BindView("activity_main_hello_android")
-    private TextView helloAndroid;
+    protected TextView helloAndroid;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

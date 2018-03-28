@@ -143,5 +143,5 @@ ext {
     junit = "4.12"
     oil = "1.1.15"
     runner = "1.0.1"
-    react_native = "0.54.2"
+    react_native = "+"
 }
