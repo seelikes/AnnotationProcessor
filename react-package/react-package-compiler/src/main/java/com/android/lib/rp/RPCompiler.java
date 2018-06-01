@@ -34,7 +34,17 @@ import javax.lang.model.element.TypeElement;
 @SupportedAnnotationTypes({"com.android.lib.rp.api.RPNativeModule", "com.android.lib.rp.api.RPViewManager"})
 public class RPCompiler extends AbstractProcessor {
     @Override
-    public boolean process(Set<? extends TypeElement> set, RoundEnvironment roundEnv) {
+    public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+        if (annotations == null || annotations.isEmpty()) {
+            return false;
+        }
+
+        for (TypeElement element : annotations) {
+            if (!GlobalMethods.getInstance().checkIn(element.getQualifiedName().toString(), "com.android.lib.rp.api.RPNativeModule", "com.android.lib.rp.api.RPViewManager")) {
+                return false;
+            }
+        }
+
         List<String> names = new ArrayList<>();
 
         List<? extends Element> modules = new ArrayList<>(roundEnv.getElementsAnnotatedWith(RPNativeModule.class));
@@ -185,6 +195,6 @@ public class RPCompiler extends AbstractProcessor {
                 e.printStackTrace();
             }
         }
-        return false;
+        return true;
     }
 }

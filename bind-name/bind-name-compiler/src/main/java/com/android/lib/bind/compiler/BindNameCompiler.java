@@ -30,6 +30,7 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.Name;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
+import javax.tools.Diagnostic;
 
 @AutoService(Processor.class)
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
@@ -43,6 +44,17 @@ public class BindNameCompiler extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+        processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "BindNameCompiler, process, annotations == null || annotations.isEmpty(): " + (annotations == null || annotations.isEmpty()));
+        if (annotations == null || annotations.isEmpty()) {
+            return false;
+        }
+
+        for (TypeElement element : annotations) {
+            if (!GlobalMethods.getInstance().checkIn(element.getQualifiedName().toString(), "com.android.lib.bind.api.annotation.BindView", "com.android.lib.bind.api.annotation.OnClick")) {
+                return false;
+            }
+        }
+
         Set<? extends Element> names = roundEnv.getElementsAnnotatedWith(BindView.class);
         if (!names.isEmpty()) {
             for (Element name : names) {
@@ -58,7 +70,7 @@ public class BindNameCompiler extends AbstractProcessor {
         }
 
         if (cache.isEmpty()) {
-            return false;
+            return true;
         }
 
         for (EnClosingClass enClosing : cache) {

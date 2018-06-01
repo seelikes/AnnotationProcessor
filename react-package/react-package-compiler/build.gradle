@@ -60,7 +60,7 @@ publishing {
         maven(MavenPublication) {
             groupId "com.android.lib"
             artifactId "react-package-compiler"
-            version "0.0.00"
+            version "0.0.01"
             description "react pacakge processor"
             artifact jar
             artifact javadocJar
