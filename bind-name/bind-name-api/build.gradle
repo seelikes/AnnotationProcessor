@@ -16,42 +16,12 @@ javadoc {
 sourceCompatibility = "1.7"
 targetCompatibility = "1.7"
 
-task javadocJar(type: Jar) {
-    classifier "javadoc"
-    from javadoc
+ext {
+    groupId = 'com.android.lib'
+    artifactId = 'bind-name-api'
+    version = '0.0.02'
+    description = 'bind name to view annotation processor support api'
+    publish = 'project'
 }
 
-task sourcesJar(type: Jar) {
-    classifier "sources"
-    from sourceSets.main.allSource
-}
-
-publishing {
-    publications {
-        maven(MavenPublication) {
-            groupId "com.android.lib"
-            artifactId "bind-name-api"
-            version "0.0.02"
-            description "bind name to view annotation processor support api"
-            artifact jar
-            artifact javadocJar
-            artifact sourcesJar
-            pom.withXml {
-                def dependencies = asNode().appendNode("dependencies")
-                wrapIntoDependencies(dependencies, configurations.api, "compile")
-                wrapIntoDependencies(dependencies, configurations.implementation, "provided")
-                wrapIntoDependencies(dependencies, configurations.compileOnly, "runtime")
-                wrapIntoDependencies(dependencies, configurations.testImplementation, "test")
-            }
-        }
-    }
-    repositories {
-        maven {
-            url project.property("deploy.release.url")
-            credentials {
-                username project.property("deploy.release.user.name")
-                password project.property("deploy.release.user.password")
-            }
-        }
-    }
-}
+apply from: 'https://github.com/seelikes/MyAndroidSet/raw/master/MyJetPackApplication/maven-publish.gradle'

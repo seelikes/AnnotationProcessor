@@ -23,7 +23,7 @@ targetCompatibility = "1.7"
 
 task configured {
     println project.name + " configured enter."
-    if (gradle.startParameter.taskRequests && gradle.startParameter.taskRequests[0].args[0].endsWith("publish") && gradle.startParameter.taskRequests[0].args[0].startsWith(":react-package:react-package-compiler")) {
+    if (gradle.startParameter.taskRequests && gradle.startParameter.taskRequests[0].args[0] && gradle.startParameter.taskRequests[0].args[0].endsWith("publish") && gradle.startParameter.taskRequests[0].args[0].startsWith(":react-package:react-package-compiler")) {
         println project.name + "configured uploadArchives enter."
         dependencies.add("api", "com.android.lib:react-package-api:0.0.00")
         dependencies.add("api", "com.java.lib:processor:0.0.00")
@@ -45,42 +45,12 @@ task configured {
     }
 }
 
-task javadocJar(type: Jar) {
-    classifier "javadoc"
-    from javadoc
+ext {
+    groupId = 'com.android.lib'
+    artifactId = 'react-package-compiler'
+    version = '0.0.01'
+    description = 'react pacakge processor'
+    publish = 'project'
 }
 
-task sourcesJar(type: Jar) {
-    classifier "sources"
-    from sourceSets.main.allSource
-}
-
-publishing {
-    publications {
-        maven(MavenPublication) {
-            groupId "com.android.lib"
-            artifactId "react-package-compiler"
-            version "0.0.01"
-            description "react pacakge processor"
-            artifact jar
-            artifact javadocJar
-            artifact sourcesJar
-            pom.withXml {
-                def dependencies = createSubNodeIfNotExist(asNode(), "dependencies")
-                wrapIntoDependencies(dependencies, configurations.api, "compile")
-                wrapIntoDependencies(dependencies, configurations.implementation, "provided")
-                wrapIntoDependencies(dependencies, configurations.compileOnly, "runtime")
-                wrapIntoDependencies(dependencies, configurations.testImplementation, "test")
-            }
-        }
-    }
-    repositories {
-        maven {
-            url project.property("deploy.release.url")
-            credentials {
-                username project.property("deploy.release.user.name")
-                password project.property("deploy.release.user.password")
-            }
-        }
-    }
-}
+apply from: 'https://github.com/seelikes/MyAndroidSet/raw/master/MyJetPackApplication/maven-publish.gradle'
